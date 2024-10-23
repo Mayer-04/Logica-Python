@@ -74,6 +74,13 @@ print("Lista modificada:", numbers)  # Salida: [10, 2, 3, 4, 5]
 numbers = numbers + [6, 7, 8]
 print("Listas concatenadas:", numbers)  # Salida: [10, 2, 3, 4, 5, 6, 7, 8]
 
+# Crear una lista con tamaño predefinido
+# Crea una lista de 2 elementos (inicialmente con valores 'None')
+list_pre = [None] * 2
+list_pre[0] = 2
+list_pre[1] = 4
+print("Lista con tamaño predefinido:", list_pre)
+
 # Desempaquetar una lista en variables individuales
 a, b, c, d, e = mixed_list
 print(
