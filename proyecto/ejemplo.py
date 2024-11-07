@@ -2,29 +2,40 @@ from machine import Pin, PWM
 import time
 
 
-# Motor A (OUT1 y OUT2)
-IN1 = Pin(5, Pin.OUT)
-IN2 = Pin(4, Pin.OUT)
-ENA = PWM(Pin(18), freq=1000)
+# Constantes
+PWM_FREQUENCY = 1000
 
-# Motor B (OUT3 y OUT4)
+
+# Motor A (OUT1 y OUT2).
+in1 = Pin(5, Pin.OUT)
+in2 = Pin(4, Pin.OUT)
+# Controla la velocidad del Motor A usando PWM con una frecuencia de 1000 Hz.
+ena = PWM(Pin(18), freq=PWM_FREQUENCY)
+
+# Motor B (OUT3 y OUT4).
 # !NOTE: Por definir.
-IN3 = Pin(6, Pin.OUT)
-IN4 = Pin(7, Pin.OUT)
-ENB = PWM(Pin(19), freq=1000)
+in3 = Pin(6, Pin.OUT)
+in4 = Pin(7, Pin.OUT)
+enb = PWM(Pin(19), freq=PWM_FREQUENCY)
 
 
-def setup():
-    print("Configuración inicial del programa")
+"""
+NOTAS:
+
+* Frecuencia de PWM:
+- Una frecuencia de 1000 Hz significa que el ciclo de "encendido-apagado" se repite 1000 veces por segundo.
+- Permite que el motor reciba impulsos eléctricos tan rápido que el movimiento es suave y eficiente.
+- Una frecuencia adecuada mejora la estabilidad, la eficiencia, y reduce ruidos y calentamiento.
+"""
 
 
 def set_motor_speed(motor_pwm: PWM, speed: int) -> None:
     """
-    Establece la velocidad PWM de los motores.
+    Ajusta la velocidad PWM de los motores.
 
     Párametros:
     - motor_pwm: El objeto PWM que controla el motor.
-    - Un valor entre 0 y 1023 que representa el ciclo de trabajo PWM.
+    - speed: Un valor entre 0 y 1023 que representa el ciclo de trabajo PWM.
     """
     motor_pwm.duty(speed)
 
@@ -34,47 +45,88 @@ def set_pin_value(pin: Pin, value: int) -> None:
     Establece el valor especificado en un pin GPIO.
 
     Parámetros:
-    - pin: El pin GPIO que se va a controlar.
-    - valor: un número entero (0 o 1) para establecer el pin bajo o alto.
+    - pin: El pin GPIO a controlar.
+    - value: Un número entero (0 o 1) para establecer el pin bajo o alto.
     """
     pin.value(value)
 
 
 def motor_stop():
-    # !NOTE: Podemos poner en 0 en los pines de control de los motores.
-    set_motor_speed(ENA, 0)
-    set_motor_speed(ENB, 0)
+    """
+    Detiene ambos motores al establecer su velocidad PWM a cero.
+
+    Esta función asegura que los motores conectados a los controladores PWM
+    no se muevan al poner el ciclo de trabajo PWM a 0.
+    """
+    set_motor_speed(ena, 0)
+    set_motor_speed(enb, 0)
 
 
 def move_forward(speed: int = 512) -> None:
-    # Configura los pines de control de los motores.
     """
     Mueve el vehículo hacia adelante.
 
     Parámetros:
-    - speed: Un valor entre 0 y 1023 que representa el ciclo de trabajo PWM para los motores.
+    - speed: Ciclo de trabajo PWM para los motores.
     Por defecto es 512 (50%).
     """
-    set_pin_value(IN1, 1)  # IN1.on()
-    set_pin_value(IN2, 0)  # IN2.off()
-    set_pin_value(IN3, 1)  # IN3.on()
-    set_pin_value(IN4, 0)  # IN4.off()
+    set_pin_value(in1, 1)  # in1.on()
+    set_pin_value(in2, 0)  # in2.off()
+    set_pin_value(in3, 1)  # in3.on()
+    set_pin_value(in4, 0)  # in4.off()
 
     # Establece la velocidad PWM de los motores.
-    set_motor_speed(ENA, speed)
-    set_motor_speed(ENB, speed)
+    set_motor_speed(ena, speed)
+    set_motor_speed(enb, speed)
 
 
 def move_backward(speed: int = 512) -> None:
-    IN1.off()  # set_pin_value(IN1, 0)
-    IN2.on()  # set_pin_value(IN2, 1)
-    IN3.off()  # set_pin_value(IN3, 0)
-    IN4.on()  # set_pin_value(IN4, 1)
+    set_pin_value(in1, 0)  # in1.off()
+    set_pin_value(in2, 1)  # in2.on()
+    set_pin_value(in3, 0)  # in3.off()
+    set_pin_value(in4, 1)  # in4.on()
 
     # Establece la velocidad PWM de los motores.
-    set_motor_speed(ENA, speed)
-    set_motor_speed(ENB, speed)
+    set_motor_speed(ena, speed)
+    set_motor_speed(enb, speed)
 
 
-while True:
-    break
+# Configuración inicial del programa
+def setup() -> None:
+    print("Configuración inicial del programa...")
+    # Asegura que ambos motores estén detenidos al inicio
+    motor_stop()
+
+    time.sleep(2)
+
+    print("Motores listos y detenidos")
+    # Llama a la secuencia de prueba principal
+    loop()
+
+
+# Bucle principal de prueba
+def loop():
+    try:
+        while True:
+            print("Moviendo hacia adelante")
+            move_forward()  # Por defecto la celocidad es 50%
+            time.sleep(2)  # Mueve hacia adelante durante 2 segundos
+
+            print("Deteniendo")
+            motor_stop()
+            time.sleep(1)  # Pausa de 1 segundo
+
+            print("Moviendo hacia atrás")
+            move_backward()  # Por defecto la celocidad es 50%
+            time.sleep(2)  # Mueve hacia atrás durante 2 segundos
+
+            print("Deteniendo")
+            motor_stop()
+            time.sleep(1)  # Pausa de 1 segundo
+
+    except KeyboardInterrupt:
+        print("Deteniendo manualmente")
+        motor_stop()
+
+
+setup()
